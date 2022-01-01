@@ -64,7 +64,8 @@ public class Parser {
                     i++;
                 }
                 tagsStack.push(currentTag.toString());
-                System.out.println("Element:");
+                currentTag.delete(0, currentTag.length());
+                System.out.println("\nElement:");
                 printPath(tagsStack);
 
                 //if beginning of attributes section
@@ -82,7 +83,12 @@ public class Parser {
                     tagsStack.pop();
 
                 }
-            }
+            } /*else if (input.charAt(i) == '<' && input.charAt(i + 1) == '/') {
+                //move to the end of closing tag
+                while (input.charAt(i) != '>') {
+                    i++;
+                }
+            }*/
 
             if (input.charAt(i) == '>' && i != input.length() - 1 ) {
                 //if empty value
@@ -99,13 +105,13 @@ public class Parser {
                 //if tag has value
                 if (input.charAt(i + 1) != '<') {
                     i++;
-                    System.out.print("value = ");
+                    System.out.print("value = \"");
                     //parse value
                     while (input.charAt(i) != '<') {
                         System.out.print(input.charAt(i));
                         i++;
                     }
-                    System.out.println();
+                    System.out.println("\"");
                     //move to the end of closing tag
                     while (input.charAt(i) != '>') {
                         i++;
@@ -151,6 +157,9 @@ public class Parser {
         }
         i++;
         attributes.put(currentAttrName.toString(), currentAttrVal.toString());
+        if (input.charAt(i) == ' ') {
+            i++;
+        }
         return i;
     }
 
@@ -160,9 +169,9 @@ public class Parser {
 
     private static void printPath(LinkedList<String> tagsStack) {
         System.out.print("path = ");
-        for (int i = 0; i < tagsStack.size(); i++) {
+        for (int i = tagsStack.size() - 1; i > -1; i--) {
             System.out.print(tagsStack.get(i));
-            if (i < tagsStack.size() - 1) {
+            if (i > 0) {
                 System.out.print(", ");
             } else {
                 System.out.println();
