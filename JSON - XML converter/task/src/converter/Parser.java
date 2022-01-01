@@ -69,20 +69,66 @@ public class Parser {
 
                 //if beginning of attributes section
                 if (input.charAt(i) == ' ') {
+                    i++;
                     //parsing Attributes
-                    while (input.charAt(i) != '/' || input.charAt(i) != '>'){
+                    while (input.charAt(i) != '/' && input.charAt(i) != '>'){
                         i = parseAttribute(input, attributes, i);
                     }
-
-
-                } else if (input.charAt(i) == '/') { //if tag value is null
+                }
+                if (input.charAt(i) == '/') { //if tag value is null
+                    System.out.println("value = null");
+                    i+=2;
+                    printAttributes(attributes);
+                    tagsStack.pop();
 
                 }
+            }
+
+            if (input.charAt(i) == '>' && i != input.length() - 1 ) {
+                //if empty value
+                if (input.charAt(i + 1) == '<' && input.charAt(i + 2) == '/') {
+                    System.out.println("value = \"\"");
+                    i+=3;
+                    //move to the end of closing tag
+                    while (input.charAt(i) != '>') {
+                        i++;
+                    }
+                    i++;
+                    tagsStack.pop();
+                }
+                //if tag has value
+                if (input.charAt(i + 1) != '<') {
+                    i++;
+                    System.out.print("value = ");
+                    //parse value
+                    while (input.charAt(i) != '<') {
+                        System.out.print(input.charAt(i));
+                        i++;
+                    }
+                    System.out.println();
+                    //move to the end of closing tag
+                    while (input.charAt(i) != '>') {
+                        i++;
+                    }
+                    i++;
+                    tagsStack.pop();
+                }
+                printAttributes(attributes);
 
             }
         }
 
 
+    }
+
+    private static void printAttributes(Map<String, String> attributes) {
+        if (attributes.size() > 0) {
+            System.out.println("attributes:");
+            for (Map.Entry<String, String> entry : attributes.entrySet()) {
+                System.out.println(entry.getKey() + " = \"" + entry.getValue() + "\"");
+            }
+            attributes.clear();
+        }
     }
 
     private static int parseAttribute(String input,Map<String, String> attributes, int i) {
