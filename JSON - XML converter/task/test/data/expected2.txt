@@ -1,0 +1,49 @@
+Element:
+path = node
+
+Element:
+path = node, child
+attributes:
+name = "child_name1"
+type = "child_type1"
+
+Element:
+path = node, child, subchild
+value = "Value1"
+attributes:
+id = "1"
+auth = "auth1"
+
+Element:
+path = node, child
+attributes:
+name = "child_name2"
+type = "child_type2"
+
+Element:
+path = node, child, subchild
+value = "Value2"
+attributes:
+id = "2"
+auth = "auth1"
+
+Element:
+path = node, child, subchild
+value = "Value3"
+attributes:
+id = "3"
+auth = "auth2"
+
+Element:
+path = node, child, subchild
+value = ""
+attributes:
+id = "4"
+auth = "auth3"
+
+Element:
+path = node, child, subchild
+value = null
+attributes:
+id = "5"
+auth = "auth3"

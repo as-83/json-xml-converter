@@ -1,0 +1,71 @@
+Element:
+path = transaction
+
+Element:
+path = transaction, id
+value = "6753322"
+
+Element:
+path = transaction, number
+value = "8-900-000-00-00"
+attributes:
+region = "Russia"
+
+Element:
+path = transaction, nonattr
+value = null
+
+Element:
+path = transaction, nonattr
+value = ""
+
+Element:
+path = transaction, nonattr
+value = "text"
+
+Element:
+path = transaction, attr
+value = null
+attributes:
+id = "1"
+
+Element:
+path = transaction, attr
+value = ""
+attributes:
+id = "2"
+
+Element:
+path = transaction, attr
+value = "text"
+attributes:
+id = "3"
+
+Element:
+path = transaction, email
+
+Element:
+path = transaction, email, to
+value = "to_example@gmail.com"
+
+Element:
+path = transaction, email, from
+value = "from_example@gmail.com"
+
+Element:
+path = transaction, email, subject
+value = "Project discussion"
+
+Element:
+path = transaction, email, body
+value = "Body message"
+attributes:
+font = "Verdana"
+
+Element:
+path = transaction, email, date
+value = null
+attributes:
+day = "12"
+month = "12"
+year = "2018"

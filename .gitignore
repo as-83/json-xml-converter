@@ -1,0 +1,15 @@
+/.idea/
+/gradle/
+/.gradle/
+/JSON - XML converter/Advanced converter/
+/JSON - XML converter/Converting attributes/
+/JSON - XML converter/Elementary_/
+/JSON - XML converter/More features/
+/JSON - XML converter/Nesting season/
+/JSON - XML converter/Parsing JSON/
+/JSON - XML converter/task/build/
+/JSON - XML converter/task/out/
+/JSON - XML converter/lesson-info.yaml
+**.yaml
+/gradlew.bat
+/gradlew
