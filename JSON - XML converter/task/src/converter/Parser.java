@@ -1,71 +1,29 @@
 package converter;
 
-import converter.helpers.Dom;
-import converter.helpers.Node;
-
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class Parser {
 
-
-    private static Dom parseXml(String input) {
-        Dom dom = new Dom();
-        Node node = new Node();
-
-        List<String> elements = new ArrayList<>();
-//        while(true) {
-//            String element = input.substring(0, input.indexOf(">" + 1));
-//            input = input.replaceFirst(element, "");
-//
-//        }
-
-
-        System.out.println("----------");
-        for (String elem: elements) {
-            System.out.println(elem);
-        }
-        System.out.println("----------");
-        node.setNodeName(input.substring(1, input.indexOf(">")));
-
-        return dom;
-    }
-
-    //splits input string with xml to tags
-    public static List<String> getTokens(String xml) {
-        List<String> tokens = new ArrayList<>();
-        Pattern pattern = Pattern.compile("(<[^<>]+>)|(>\\w*?</)");
-        Matcher matcher = pattern.matcher(xml);
-        while (matcher.find()) {
-            tokens.add(matcher.group());
-        }
-        tokens.forEach(System.out::println);
-        return tokens;
-    }
-    
-    
-
     public static void parseXml2(String input) {
-        Dom dom = new Dom();
-        Node currentNode = new Node();
-        StringBuilder currentTag = new StringBuilder();
-        LinkedList<String> tagsStack = new LinkedList<>();
-        Map<String, String> attributes = new LinkedHashMap<>();
+        /*Dom dom = new Dom();
+        Node currentNode = new Node();*/
 
+        ArrayDeque<String> tagsStack = new ArrayDeque<String>();
+        Map<String, String> attributes = new LinkedHashMap<>();
 
         for (int i = 0; i < input.length(); i++) {
             //if beginning of tag
-            if (isTagsStart(input, i)) {
+            if (input.charAt(i) == '<' && input.charAt(i + 1) != '/') {
                 i++;
                 //parsing tag name
+                StringBuilder currentTagName = new StringBuilder();
                 while (isNoTagsNameEnd(input, i)) {
-                    currentTag.append(input.charAt(i));
+                    currentTagName.append(input.charAt(i));
                     i++;
                 }
-                tagsStack.push(currentTag.toString());
-                currentTag.delete(0, currentTag.length());
-                System.out.println("\nElement:");
+                tagsStack.add(currentTagName.toString());
+                System.out.println("Element:");
                 printPath(tagsStack);
 
                 //if beginning of attributes section
@@ -78,48 +36,50 @@ public class Parser {
                 }
                 if (input.charAt(i) == '/') { //if tag value is null
                     System.out.println("value = null");
-                    i+=2;
-                    printAttributes(attributes);
-                    tagsStack.pop();
-
-                }
-            } /*else if (input.charAt(i) == '<' && input.charAt(i + 1) == '/') {
-                //move to the end of closing tag
-                while (input.charAt(i) != '>') {
                     i++;
-                }
-            }*/
+                    printAttributes(attributes);
+                    tagsStack.removeLast();
 
-            if (input.charAt(i) == '>' && i != input.length() - 1 ) {
+                }
+            } else if (input.charAt(i) == '<' && input.charAt(i + 1) == '/') {
+                while (input.charAt(i) == '<' && input.charAt(i + 1) == '/') {
+                    //move to the end of closing tag
+                    while (input.charAt(i) != '>') {
+                        i++;
+                    }
+                    tagsStack.removeLast();
+                    if (i < input.length() - 1 && input.charAt(i + 1) == '<' && input.charAt(i + 2) == '/') {
+                        i++;
+                    }
+                }
+            }
+
+            if (input.charAt(i) == '>' && input.charAt(i - 1) != '/' && i != input.length() - 1 ) {
                 //if empty value
                 if (input.charAt(i + 1) == '<' && input.charAt(i + 2) == '/') {
                     System.out.println("value = \"\"");
-                    i+=3;
-                    //move to the end of closing tag
-                    while (input.charAt(i) != '>') {
-                        i++;
-                    }
-                    i++;
-                    tagsStack.pop();
                 }
                 //if tag has value
                 if (input.charAt(i + 1) != '<') {
+
                     i++;
-                    System.out.print("value = \"");
-                    //parse value
-                    while (input.charAt(i) != '<') {
+
+                    if (input.charAt(i) == '\n' || input.charAt(i) == '\t') {
+                        while (input.charAt(i) == '\n' || input.charAt(i) == '\t') {
+                            i++;
+                        }
+                    } else {
+                        System.out.print("value = \"");
+                        //parse value
+                        while (input.charAt(i + 1) != '<') {
+                            System.out.print(input.charAt(i));
+                            i++;
+                        }
                         System.out.print(input.charAt(i));
-                        i++;
+                        System.out.println("\"");
                     }
-                    System.out.println("\"");
-                    //move to the end of closing tag
-                    while (input.charAt(i) != '>') {
-                        i++;
-                    }
-                    i++;
-                    tagsStack.pop();
+                    printAttributes(attributes);
                 }
-                printAttributes(attributes);
 
             }
         }
@@ -134,6 +94,8 @@ public class Parser {
                 System.out.println(entry.getKey() + " = \"" + entry.getValue() + "\"");
             }
             attributes.clear();
+        } else {
+            System.out.println();
         }
     }
 
@@ -141,7 +103,7 @@ public class Parser {
         StringBuilder currentAttrName = new StringBuilder();
         StringBuilder currentAttrVal = new StringBuilder();
         //parsing attribute name
-        while (!isAttrNameEnd(input, i)) {
+        while (!(input.charAt(i) == '=' || input.charAt(i) == ' ')) {
             currentAttrName.append(input.charAt(i));
             i++;
         }
@@ -163,27 +125,23 @@ public class Parser {
         return i;
     }
 
-    private static boolean isAttrNameEnd(String input, int i) {
-        return input.charAt(i) == '=' || input.charAt(i) == ' ';
-    }
-
-    private static void printPath(LinkedList<String> tagsStack) {
+    private static void printPath(ArrayDeque<String> tagsStack) {
         System.out.print("path = ");
-        for (int i = tagsStack.size() - 1; i > -1; i--) {
-            System.out.print(tagsStack.get(i));
-            if (i > 0) {
+
+        Iterator<String> iterator = tagsStack.iterator();
+        while (iterator.hasNext()) {
+            System.out.print(iterator.next());
+            if (iterator.hasNext()) {
                 System.out.print(", ");
             } else {
                 System.out.println();
             }
         }
+
     }
 
     private static boolean isNoTagsNameEnd(String input, int i) {
         return input.charAt(i) != '/' && input.charAt(i) != '>' && input.charAt(i) != ' ';
     }
 
-    private static boolean isTagsStart(String input, int i) {
-        return input.charAt(i) == '<' && input.charAt(i + 1) != '/';
-    }
 }
