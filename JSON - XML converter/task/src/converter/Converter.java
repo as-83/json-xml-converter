@@ -167,8 +167,9 @@ public class Converter {
         Document doc = builder.newDocument();
 
         JsonParser parser = new JsonParser();
-
         JsonElement jsonTree = parser.parse(json);
+
+
         jsonToXmlDom(jsonTree, doc, null);
 
         toXmlFile(doc);
@@ -176,43 +177,53 @@ public class Converter {
 
     }
 
-    private static void jsonToXmlDom(JsonElement jsonTree, Document doc, Element parentNode) {
+    private static void jsonToXmlDom(JsonElement jsonTree, Document doc, Element xmlParentNode) {
 
         if (jsonTree.isJsonObject()) {
             JsonObject jsonObject = jsonTree.getAsJsonObject();
-            Set<Map.Entry<String, JsonElement>> set = jsonObject.entrySet();
-            Element newNode;
+            Set<Map.Entry<String, JsonElement>> jsonEntrySet = jsonObject.entrySet();
+            Element newXmlNode;
+            Map<String,String> attributesMap = new LinkedHashMap<>();//for saving intermediate values
+            Map<String,String> otherElementsMap = new LinkedHashMap<>();//for saving intermediate values
+            boolean isAttrsCorrect = true;
 
-            for (Map.Entry<String, JsonElement> entry : set) {
-                if (parentNode == null) {
-                    parentNode = newNode = doc.createElementNS("", entry.getKey());
+            for (Map.Entry<String, JsonElement> jsonEntry : jsonEntrySet) {
+                if (xmlParentNode == null) {
+                    xmlParentNode = newXmlNode = doc.createElementNS("", jsonEntry.getKey());
                     // добавляем корневой элемент в объект Document
-                    doc.appendChild(parentNode);
+                    doc.appendChild(xmlParentNode);
                 } else {
-                    newNode = doc.createElement(entry.getKey().replaceAll("[#@]", ""));
+                    newXmlNode = doc.createElement(jsonEntry.getKey().replaceAll("[#@]", ""));
                 }
 
-                if (entry.getValue().isJsonObject()) {
-                    if (newNode != parentNode) {
-                        parentNode.appendChild(newNode);
+                if (jsonEntry.getValue().isJsonObject()) {
+                    if (newXmlNode != xmlParentNode) {
+                        xmlParentNode.appendChild(newXmlNode);
                     }
-                    jsonToXmlDom(entry.getValue(), doc, newNode);
-                } else if (entry.getValue().isJsonPrimitive()) {
-                    if (entry.getKey().startsWith("@")) {
-                        parentNode.setAttribute(entry.getKey().replaceAll("[#@]", ""), entry.getValue().toString().replaceAll("[#@\"]", ""));
-                    } else if (entry.getKey().startsWith("#")) {
-                        parentNode.appendChild(doc.createTextNode(entry.getValue().toString().replaceAll("\"", "")));
+                    jsonToXmlDom(jsonEntry.getValue(), doc, newXmlNode);
+                } else if (jsonEntry.getValue().isJsonPrimitive()) {
+                    if (jsonEntry.getKey().startsWith("@")) {
+                        xmlParentNode.setAttribute(jsonEntry.getKey().replaceAll("[#@]", ""), jsonEntry.getValue().toString().replaceAll("[#@\"]", ""));
+                    } else if (jsonEntry.getKey().startsWith("#")) {
+                        xmlParentNode.appendChild(doc.createTextNode(jsonEntry.getValue().toString().replaceAll("\"", "")));
                     } else {
-                        if (parentNode != newNode) {
-                            parentNode.appendChild(newNode);
-                            newNode.appendChild(doc.createTextNode(entry.getValue().toString().replaceAll("\"", "")));
+                        if (xmlParentNode != newXmlNode) {
+                            xmlParentNode.appendChild(newXmlNode);
+                            newXmlNode.appendChild(doc.createTextNode(jsonEntry.getValue().toString().replaceAll("\"", "")));
                         } else {
-                            parentNode.appendChild(doc.createTextNode(entry.getValue().toString().replaceAll("\"", "")));
+                            xmlParentNode.appendChild(doc.createTextNode(jsonEntry.getValue().toString().replaceAll("\"", "")));
                         }
 
                     }
 
                 }
+            }
+            //if attributes names are correct
+            //add attributes and value to current node
+            if (isAttrsCorrect) {
+
+            } else {//else add child nodes with modified names
+
             }
 
         }

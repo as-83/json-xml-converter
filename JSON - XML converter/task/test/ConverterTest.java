@@ -14,9 +14,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static util.Assert.assertEquals;
 import static util.Assert.assertFalse;
 
-
 public class ConverterTest extends StageTest {
-
     private static final Pattern ELEMENTS_DELIMITER = Pattern
             .compile("\\s+(?=Element:)", Pattern.CASE_INSENSITIVE);
 
@@ -25,7 +23,7 @@ public class ConverterTest extends StageTest {
     @DynamicTest(data = "testCases")
     CheckResult simpleTest(final int testCase) throws IOException {
         Files.copy(
-                Path.of("test/data/test" + testCase + ".xml"),
+                Path.of("test/data/test" + testCase + ".json"),
                 Path.of("test.txt"),
                 StandardCopyOption.REPLACE_EXISTING);
 
@@ -59,4 +57,5 @@ public class ConverterTest extends StageTest {
                 .map(Element::parse)
                 .collect(toUnmodifiableList());
     }
+
 }

@@ -1,1 +1,76 @@
-<transaction><id>6753322</id><number region="Russia">8-900-000-00-00</number><nonattr /><nonattr></nonattr><nonattr>text</nonattr><attr id="1" /><attr id="2"></attr><attr id="3">text</attr><email><to>to_example@gmail.com</to><from>from_example@gmail.com</from><subject>Project discussion</subject><body font="Verdana">Body message</body><date day="12" month="12" year="2018"/></email></transaction>
+{
+    "transaction": {
+        "id": "6753322",
+        "number": {
+            "@region": "Russia",
+            "#number": "8-900-000-000"
+        },
+        "empty1": null,
+        "empty2": { },
+        "empty3": "",
+        "inner1": {
+            "inner2": {
+                "inner3": {
+                    "key1": "value1",
+                    "key2": "value2"
+                }
+            }
+        },
+        "inner4": {
+            "@": 123,
+            "#inner4": "value3"
+        },
+        "inner4.2": {
+            "": 123,
+            "#inner4.2": "value3"
+        },
+        "inner5": {
+            "@attr1": 123.456,
+            "#inner4": "value4"
+        },
+        "inner6": {
+            "@attr2": 789.321,
+            "#inner6": "value5"
+        },
+        "inner7": {
+            "#inner7": "value6"
+        },
+        "inner8": {
+            "@attr3": "value7"
+        },
+        "inner9": {
+            "@attr4": "value8",
+            "#inner9": "value9",
+            "something": "value10"
+        },
+        "inner10": {
+            "@attr5": null,
+            "#inner10": null
+        },
+        "inner11": {
+            "@": null,
+            "#": null
+        },
+        "inner12": {
+            "@somekey": "attrvalue",
+            "#inner12": null,
+            "somekey": "keyvalue",
+            "inner12": "notnull"
+        },
+        "inner13": {
+            "@invalid_attr": {
+                "some_key": "some value"
+            },
+            "#inner13": {
+                "key": "value"
+            }
+        },
+        "": {
+            "#": null,
+            "secret": "this won't be converted"
+        }
+    },
+    "meta": {
+        "version": 0.01
+    }
+}
