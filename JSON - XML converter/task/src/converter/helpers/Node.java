@@ -1,15 +1,15 @@
 package converter.helpers;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Node {
     private String nodeName;
     private String value;
-    private Map<String, String> attributes = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> attributes = new LinkedHashMap<>();
     private List<Node> children;
-    private List<Node> parent;
+    private Node parent;
     private NodeType nodeType;
 
     public Node() {
@@ -31,11 +31,11 @@ public class Node {
         this.value = value;
     }
 
-    public Map<String, String> getAttributes() {
+    public LinkedHashMap<String, String> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(LinkedHashMap<String, String> attributes) {
         this.attributes = attributes;
     }
 
@@ -47,11 +47,11 @@ public class Node {
         this.children = children;
     }
 
-    public List<Node> getParent() {
+    public Node getParent() {
         return parent;
     }
 
-    public void setParent(List<Node> parent) {
+    public void setParent(Node parent) {
         this.parent = parent;
     }
 
@@ -63,5 +63,14 @@ public class Node {
         this.nodeType = nodeType;
     }
 
+    public void addChild(Node newNode) {
+        if (children == null) {
+            children = new ArrayList<>();
+        }
+        children.add(newNode);
+    }
 
+    public void addAttribute(String key, String value) {
+         attributes.put(key, value);
+    }
 }

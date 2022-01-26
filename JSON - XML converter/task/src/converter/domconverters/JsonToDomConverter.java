@@ -1,27 +1,37 @@
-package converter.converters;
+package converter.domconverters;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import converter.helpers.Dom;
+import converter.helpers.Node;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
-public class JsonToContentConverter {
-    private static ArrayDeque<String> pathStack = new ArrayDeque<String>();
+public class JsonToDomConverter {
+    private static ArrayDeque<String> pathStack = new ArrayDeque<>();
     private static Map<String, String> attributes = new LinkedHashMap<>();
     private static  String textValue = "";
-    static boolean notFirstElement = false;
+    private Dom dom;
 
-    public static void jsonToContent(String json) throws ParserConfigurationException, FileNotFoundException {
+    public static Dom convert(String json) throws ParserConfigurationException, FileNotFoundException {
         //getting json tree
         JsonParser parser = new JsonParser();
         JsonElement jsonTree = parser.parse(json);
         /* PrintStream tmpOut = System.out;
         System.setOut(new PrintStream("out.txt"));*/
-        jsonToContent(jsonTree);
+        Dom dom = new Dom();
+        Node node = new Node();
+        node.setNodeName("root");
+        dom.setRoot(node);
+        convert(jsonTree, node);
         //System.setOut(tmpOut);
+        return dom;
     }
 
     /*
@@ -48,11 +58,12 @@ public class JsonToContentConverter {
          standard object after certain manipulations. For example inner1, inner2 and inner3 from the
          first example are objects without attributes with no errors in construction.
      */
-    private static void jsonToContent(JsonElement jsonTree) {
+    private static void convert(JsonElement jsonTree, Node currentNode) {
 
         if (jsonTree.isJsonObject()) {
             JsonObject jsonObject = jsonTree.getAsJsonObject();
             Set<Map.Entry<String, JsonElement>> jsonObjectEntrySet = jsonObject.entrySet();
+            Node newNode = new Node();
 
             //checking the attributes correctness
             boolean noAttributes = jsonObjectEntrySet.stream()
@@ -78,29 +89,28 @@ public class JsonToContentConverter {
             //or there are no attributes at all then add them as nodes not attributes
             if (noAttributes) {
                 for (Map.Entry<String, JsonElement> jsonEntry : jsonObjectEntrySet) {
-                    if (notFirstElement) {
-                        System.out.println();
-                    }
-                   pathStack.add(jsonEntry.getKey().replaceFirst("[@#]", ""));
-                    addPathSection();
-                    notFirstElement = true;
+                    newNode = new Node();
+                    newNode.setNodeName(jsonEntry.getKey().replaceFirst("[@#]", ""));
+                    currentNode.addChild(newNode);
+                    newNode.setParent(currentNode);
 
+                    pathStack.add(jsonEntry.getKey().replaceFirst("[@#]", ""));
 
                     if (jsonEntry.getValue().isJsonObject()) {
                         Set<Map.Entry<String, JsonElement>> nextJsonObjectEntrySet = jsonEntry.getValue().getAsJsonObject().entrySet();
                         long correctKeysCount = nextJsonObjectEntrySet.stream().filter( e -> !e.getKey().isBlank() &&
                                 !( (e.getKey().startsWith("@") || (e.getKey().startsWith("#"))) && e.getKey().length() == 1)).count();
                         if (correctKeysCount == 0){
-                            System.out.println("value = \"\"");
+                            newNode.setValue("");
                         } else {
                             //recursive call for next jsonEntry
-                            jsonToContent(jsonEntry.getValue());
+                            convert(jsonEntry.getValue(), newNode);
                         }
                     } else if (jsonEntry.getValue().isJsonPrimitive()) {
-                        textValue = jsonEntry.getValue().toString().replaceAll("[@#]", "");
-                        addValueSection();
+                        textValue = jsonEntry.getValue().toString().replaceAll("[@#\"]", "");
+                        newNode.setValue(textValue);
                     } else if (jsonEntry.getValue().isJsonNull()) {
-                        System.out.println("value = null");
+                        newNode.setValue(null);
                     }
                     pathStack.removeLast();
                 }
@@ -108,63 +118,29 @@ public class JsonToContentConverter {
                 for (Map.Entry<String, JsonElement> jsonEntry : jsonObjectEntrySet) {
 
                     if (jsonEntry.getValue().isJsonObject()) {
-                        jsonToContent(jsonEntry.getValue());
+                        convert(jsonEntry.getValue(), newNode);
                     } else {
                         if (jsonEntry.getKey().startsWith("@")) {
-                            String value = jsonEntry.getValue().toString();
+                            String value = jsonEntry.getValue().toString().replaceAll("\"", "");
                             if (jsonEntry.getValue().isJsonNull()) {
                                 value = "";
                             }
-                            attributes.put(jsonEntry.getKey().replaceAll("[#@]", ""),value);
+                            currentNode.addAttribute(jsonEntry.getKey().replaceAll("[#@]", ""),value);
+                           // attributes.put(jsonEntry.getKey().replaceAll("[#@]", ""),value);
                         } else if (jsonEntry.getKey().startsWith("#")) {
                             if (jsonEntry.getValue().isJsonPrimitive()) {
-                                textValue = jsonEntry.getValue().toString().replaceAll("[@#]", "");
-                                addValueSection();
-                            }else if (jsonEntry.getValue().isJsonNull()) {
-                                System.out.println("value = null");
+                                textValue = jsonEntry.getValue().toString().replaceAll("[@#\"]", "");
+                                currentNode.setValue(textValue);//TODO
                             }
                         }
                     }
                 }
-                addAttributesSection();
             }
 
         }
     }
 
-    private static void addValueSection() {
-        if (!textValue.startsWith("\"")) {
-           textValue = "\"" + textValue + "\"";
-        }
-        System.out.println("value = " + textValue);
-    }
 
-    private static void addAttributesSection() {
-        if (attributes.size() > 0) {
-            System.out.println("attributes:");
-            for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                System.out.println(entry.getKey() + " = \"" + entry.getValue() + "\"");
-            }
-            //System.out.println();
-            attributes.clear();
-        } /*else {
-            System.out.println();
-        }*/
-    }
 
-    private static void addPathSection() {
-        System.out.print("Element:\npath = ");
-
-        Iterator<String> iterator = pathStack.iterator();
-        while (iterator.hasNext()) {
-            System.out.print(iterator.next());
-            if (iterator.hasNext()) {
-                System.out.print(", ");
-            } else {
-                System.out.println();
-            }
-        }
-
-    }
 
 }

@@ -1,4 +1,4 @@
-package converter.converters;
+package converter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
